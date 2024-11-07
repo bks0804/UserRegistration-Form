@@ -6,6 +6,7 @@ const {
   loginUser,
 } = require("../controllers/userController");
 const multer = require("multer");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 
 // Multer configuration for profile picture upload
 const storage = multer.diskStorage({
@@ -22,7 +23,7 @@ const upload = multer({
 }); // 2MB limit
 
 router.post("/image/upload", upload.single("imgFile"), (req, res) => {
-  console.log(req.file);
+  // console.log(req.file);
   return res.status(200).json({
     url: `http://localhost:8000/${req.file.path.replace("public\\", "")}`,
   });

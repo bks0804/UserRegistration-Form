@@ -10,15 +10,33 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const userById = await User.findById(id);
+
+    if (!userById) {
+      return res.status(401).json({ message: "user not found" });
+    }
+
+    return res.status(200).json(userById);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Update user details (admin only)
 exports.updateUser = async (req, res) => {
   try {
+    // console.log("hit");
+    console.log(req.body);
     const { id } = req.params;
     const {
       fullName,
       phoneNumber,
       email,
-      address: { city, state, country, postalCode },
+      address: { street, city, state, country, postalCode },
     } = req.body;
 
     const user = await User.findByIdAndUpdate(
@@ -27,7 +45,7 @@ exports.updateUser = async (req, res) => {
         fullName,
         phoneNumber,
         email,
-        address: { city, state, country, postalCode },
+        address: { street, city, state, country, postalCode },
       },
       { new: true }
     );
@@ -36,6 +54,7 @@ exports.updateUser = async (req, res) => {
 
     res.status(200).json(user);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -1,39 +1,46 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import UpdateProfileModal from "./UpdateProfileModal";
+import DeleteProfileModal from "./DeleteProfileModal";
 // import DeleteProfileModal from "../Modal/DeleteProfileModal";
 
 const AdminSection = () => {
   // ** Data state
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
-
+  const [users, setUsers] = useState([]);
   // ** Edit and Delete state
-  const [openEditModal, setOpenEditModal] = useState(false);
+  const [editUser, setEditUser] = useState(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [itemId, setItemId] = useState();
 
-  function handleViewModal(index) {
-    setOpenViewModal(true);
-    setItemId(index);
-  }
+  // function handleViewModal(index) {
+  //   setOpenViewModal(true);
+  //   setItemId(index);
+  // }
 
   // Fetch data from the backend API
   useEffect(() => {
+    const token = localStorage.getItem("token");
     axios
-      .get("http://localhost:8000/api/admin/users")
-      .then((response) => response.json())
-      .then((data) => setData(data))
+      .get("http://localhost:8000/api/admin/users", {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((res) => {
+        setUsers(res.data);
+      })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
+  // console.log(users);
 
   return (
     <>
       <div className="p-4 relative">
         <table className="border w-full">
           <thead>
-            <tr className="text-[12px] font-medium border-t">
-              <th className="px-4 py-2">
+            <tr className="text-[14px] font-medium border-t">
+              <th className="pl-20 py-2">
                 <div className="text-[#475467] flex gap-2 items-center">
                   <span>Fullname</span>
                 </div>
@@ -53,15 +60,15 @@ const AdminSection = () => {
                   <span>Address</span>
                 </div>
               </th>
-              <th className="px-4 py-2">
+              {/* <th className="px-4 py-2">
                 <div className="text-[#475467] flex gap-2 items-center">
                   <span>Status</span>
                 </div>
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody>
-            {data.map((user, index) => (
+            {users.map((user, index) => (
               <tr
                 key={index}
                 className={`border-t ${index % 2 === 1 ? "" : "bg-[#E4E7EC]"}`}
@@ -73,8 +80,8 @@ const AdminSection = () => {
                       src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                       alt=""
                     />
-                    <div className="flex flex-col">
-                      <span className="text-sm text-[#101828] font-medium">
+                    <div className="flex flex-col text-center">
+                      <span className="text-sm text-[#101828] font-medium  px-2 pt-2">
                         {user.fullName}
                       </span>
                     </div>
@@ -82,25 +89,7 @@ const AdminSection = () => {
                 </td>
                 <td className="px-4 py-2 cursor-pointer">
                   <div>
-                    <span className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs font-medium border-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="0.65em"
-                        height="0.65em"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="#17B26A"
-                          d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10 10 10 0 0 0 10-10A10 10 0 0 0 12 2"
-                        />
-                      </svg>
-                      {user.isVerified}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-4 py-2 cursor-pointer">
-                  <div>
-                    <span className="text-[#475467] font-normal text-sm">
+                    <span className="inline-flex items-center gap-2 px-2 py-1 text-xs font-medium">
                       {user.email}
                     </span>
                   </div>
@@ -114,12 +103,19 @@ const AdminSection = () => {
                 </td>
                 <td className="px-4 py-2 cursor-pointer">
                   <div className="flex gap-2">
-                    <span className="inline-flex items-center rounded-full bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
-                      Design
+                    <span className="inline-flex items-center rounded-md bg-purple-50 px-2 py-1 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-700/10">
+                      {user.address?.city}, {user.address?.state} ,
+                      {user.address?.country}
                     </span>
-                    {user.address}
                   </div>
                 </td>
+                {/* <td className="px-4 py-2 cursor-pointer">
+                  <div>
+                    <span className="text-[#475467] font-normal text-sm">
+                      {user.isVerified}
+                    </span>
+                  </div>
+                </td> */}
                 <td className="px-4 py-2">
                   <div className="flex gap-2 items-center">
                     <svg
@@ -129,7 +125,7 @@ const AdminSection = () => {
                       viewBox="0 0 24 24"
                       cursor="pointer"
                       onClick={() => {
-                        setOpenDeleteModal(true);
+                        setOpenDeleteModal(user);
                         setItemId(index);
                       }}
                     >
@@ -145,7 +141,7 @@ const AdminSection = () => {
                       viewBox="0 0 24 24"
                       cursor="pointer"
                       onClick={() => {
-                        setOpenEditModal(true);
+                        setEditUser(user);
                         setItemId(index);
                       }}
                     >
@@ -158,6 +154,7 @@ const AdminSection = () => {
                 </td>
               </tr>
             ))}
+
             {loading && (
               <tr className="border-t">
                 <td className="px-4 py-2" colSpan={6}>
@@ -307,22 +304,24 @@ const AdminSection = () => {
           </tbody>
         </table>
       </div>
-      {openEditModal && (
+
+      {editUser && (
         <UpdateProfileModal
+          data={editUser}
           closeModal={() => {
-            setOpenEditModal(false);
+            setEditUser(null);
             setItemId();
           }}
         />
       )}
-      {/* {openDeleteModal && (
+      {openDeleteModal && (
         <DeleteProfileModal
           closeModal={() => {
             setOpenDeleteModal(false);
             setItemId();
           }}
         />
-      )} */}
+      )}
     </>
   );
 };

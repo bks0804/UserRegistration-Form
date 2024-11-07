@@ -12,14 +12,11 @@ exports.registerUser = async (req, res) => {
       password,
       phoneNumber,
       dateOfBirth,
-      street,
-      city,
-      state,
-      country,
-      postalCode,
+      address: { street, city, state, country, postalCode },
+      profilePicture,
     } = req.body;
 
-    console.log(req.body);
+    // console.log(req.body);
 
     // Check if user already exists
     let user = await User.findOne({ email });
@@ -28,7 +25,7 @@ exports.registerUser = async (req, res) => {
     // Validate password and phone number (use validate.js)
     const otp = generateOTP();
     const otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
-    console.log({ otp, otpExpires });
+    console.log(req.body);
 
     user = new User({
       fullName,
@@ -43,7 +40,7 @@ exports.registerUser = async (req, res) => {
         country,
         postalCode,
       },
-      profilePicture: req.file,
+      profilePicture,
       otp,
       otpExpires,
     });
@@ -65,7 +62,7 @@ exports.verifyOTP = async (req, res) => {
     const { email, otp } = req.body;
 
     const user = await User.findOne({ email });
-    console.log(user);
+    // console.log(user);
     if (!user || user.otpExpires < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }

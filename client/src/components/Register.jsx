@@ -11,11 +11,7 @@ const Register = () => {
     confirmPassword: "",
     phoneNumber: "",
     dateOfBirth: "",
-    streetAddress: "",
-    city: "",
-    state: "",
-    country: "",
-    postalCode: "",
+    address: { street: "", city: "", state: "", country: "", postalCode: "" },
     profilePicture: null,
   });
 
@@ -26,7 +22,15 @@ const Register = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+    if (name in formData.address) {
+      setFormData({
+        ...formData,
+        address: { ...formData.address, [name]: value },
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleFileChange = (e) => {
@@ -134,16 +138,20 @@ const Register = () => {
         imgFormData
       );
 
+      // console.log(imgRes.data.url);
       // ** User create API
       const response = await axios.post(
         "http://localhost:8000/api/users/registeruser",
-        { ...formData, profilePicture: imgRes.data.url }
+        {
+          ...formData,
+          profilePicture: imgRes?.data?.url,
+        }
       );
 
+      console.log("Registration Response:", response.data);
       if (response.data) {
         setOtpSent(true); // Show OTP input after email OTP is sent
       }
-      console.log(response.data);
     } catch (error) {
       setError("Something went wrong, please try again.");
     }
@@ -159,7 +167,7 @@ const Register = () => {
           otp,
         }
       );
-      console.log(response.data);
+      // console.log(response.data);
 
       if (response.data) {
         setOtpSent(true);
@@ -176,7 +184,7 @@ const Register = () => {
     <div className="max-w-xl mx-auto p-8 bg-gray-100 shadow-lg rounded-md mt-5">
       {otpSent ? (
         <>
-          <h2 className="text-2xl font-bold text-green-600">
+          <h2 className="text-2xl font-bold text-green-600 ">
             Registration Successful!
           </h2>
 
@@ -203,7 +211,7 @@ const Register = () => {
         </>
       ) : (
         <>
-          <h2 className="text-3xl font-bold mb-6 text-center">
+          <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-br from-red-400 to-indigo-500">
             Registration Form
           </h2>
           <form onSubmit={handleSubmit}>
@@ -263,9 +271,9 @@ const Register = () => {
               />
               <input
                 type="text"
-                name="streetAddress"
-                placeholder="Street Address"
-                value={formData.streetAddress}
+                name="street"
+                placeholder="Street"
+                value={formData.address.street}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
                 required
@@ -274,7 +282,7 @@ const Register = () => {
                 type="text"
                 name="city"
                 placeholder="City"
-                value={formData.city}
+                value={formData.address.city}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
                 required
@@ -283,7 +291,7 @@ const Register = () => {
                 type="text"
                 name="state"
                 placeholder="State/Province"
-                value={formData.state}
+                value={formData.address.state}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
                 required
@@ -292,14 +300,14 @@ const Register = () => {
                 type="text"
                 name="postalCode"
                 placeholder="Postal Code"
-                value={formData.postalCode}
+                value={formData.address.postalCode}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
                 required
               />
               <select
                 name="country"
-                value={formData.country}
+                value={formData.address.country}
                 onChange={handleInputChange}
                 className="p-2 border rounded"
                 required
